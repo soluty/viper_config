@@ -510,6 +510,24 @@ func readFromRemote() {
 	if err != nil {
 		panic(err)
 	}
+	if watchFunc != nil {
+		go func() {
+			for {
+				time.Sleep(time.Second * 5) // delay after each request
+				err := viper.WatchRemoteConfig()
+				if err != nil {
+					log.Errorf("unable to read remote config: %v", err)
+					continue
+				}
+				err := viper.Unmarshal(&C)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				watchFunc()
+			}
+		} ()
+	}
 	{{ end }}
 }
 
