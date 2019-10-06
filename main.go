@@ -458,6 +458,7 @@ import (
 	"fmt"
 {{if .HasNet}}	"net"{{end}}
 {{if .HasTime}}	"time"{{end}}
+{{if ne .Remote ""}}	_ "github.com/spf13/viper/remote"{{end}}
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
