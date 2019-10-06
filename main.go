@@ -24,11 +24,28 @@ type Config struct {
 	Struct  string
 	Output  string
 
+	Remote     string
+	RemoteUrl  string
+	RemoteType string
+	RemoteKey  string
+
 	FlagValues    []string
 	EnvValues     []string
 	DefaultValues []string
 	HasNet        bool
 	HasTime       bool
+}
+
+var SupportRemote = []string{"etcd", "consul"}
+var SupportType = []string{"json", "toml", "yaml", "yml", "properties", "props", "prop", "env", "dotenv"}
+
+func containString(arr []string, s string) bool {
+	for _, value := range arr {
+		if value == s {
+			return true
+		}
+	}
+	return false
 }
 
 var C = &Config{}
@@ -40,8 +57,29 @@ func main() {
 	flag.StringVar(&C.Struct, "s", "Config", "配置结构体的名字")
 	flag.StringVar(&C.Env, "e", "app", "环境变量前缀")
 	flag.StringVar(&C.Output, "o", "gen.go", "生成的文件路径")
+	flag.StringVar(&C.Remote, "r", "", "远程配置中心类型, 可选值etcd，consul")
+	flag.StringVar(&C.RemoteUrl, "rurl", "", "远程配置中心url")
+	flag.StringVar(&C.RemoteType, "rtype", "json", "远程配置中心文件类型")
+	flag.StringVar(&C.RemoteKey, "rkey", "app_config_key", "远程配置中心k/v store的key")
 
 	flag.Parse()
+
+	if C.RemoteUrl == "" {
+		if C.Remote == "etcd" {
+			C.RemoteUrl = "http://127.0.0.1:4001"
+		} else if C.Remote == "consul" {
+			C.RemoteUrl = "http://127.0.0.1:8500"
+		}
+	}
+
+	if C.Remote != "" {
+		if !containString(SupportRemote, C.Remote) {
+			panic(fmt.Sprintf("不支持的远程配置中心，目前只支持%v", SupportRemote))
+		}
+		if !containString(SupportType, C.RemoteType) {
+			panic(fmt.Sprintf("不支持的远程文件类型，目前只支持%v", SupportType))
+		}
+	}
 
 	node, err := parser.ParseFile(token.NewFileSet(), C.File, nil, parser.ParseComments)
 	if err != nil {
@@ -434,6 +472,7 @@ func Init(watch func(), filePath ...string) {
 	setEnv()
 	readConfigFile(filePath)
 	setDefaults()
+	readFromRemote()
 	err := viper.Unmarshal(&C)
 	if err != nil {
 		panic(err)
@@ -461,6 +500,17 @@ func setEnv() {
 func setDefaults() {
 {{ range $v := .DefaultValues }}
 	{{ $v }}{{ end }}
+}
+
+func readFromRemote() {
+	{{if ne .Remote ""}}
+	viper.AddRemoteProvider("{{.Remote}}", "{{.RemoteUrl}}", "{{.RemoteKey}}")
+	viper.SetConfigType("{{.RemoteType}}")
+	err := viper.ReadRemoteConfig()
+	if err != nil {
+		panic(err)
+	}
+	{{ end }}
 }
 
 func readConfigFile(path []string) {
