@@ -539,7 +539,12 @@ func readFromRemote() {
 }
 
 func readConfigFile(path []string) {
-	viper.SetConfigName("{{ .Config }}")
+	env := os.Getenv("GO_ENV")
+	if env != "" {
+		viper.SetConfigName(env)
+	} else {
+		viper.SetConfigName("{{ .Config }}")
+	}
 	if len(path) == 0 {
 		viper.AddConfigPath(".")
 	}else {
