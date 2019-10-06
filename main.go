@@ -24,10 +24,11 @@ type Config struct {
 	Struct  string
 	Output  string
 
-	Remote     string
-	RemoteUrl  string
-	RemoteType string
-	RemoteKey  string
+	Remote       string
+	RemoteUrl    string
+	RemoteType   string
+	RemoteKey    string
+	RemoteSecret string
 
 	FlagValues    []string
 	EnvValues     []string
@@ -61,6 +62,7 @@ func main() {
 	flag.StringVar(&C.RemoteUrl, "rurl", "", "远程配置中心url")
 	flag.StringVar(&C.RemoteType, "rtype", "json", "远程配置中心文件类型")
 	flag.StringVar(&C.RemoteKey, "rkey", "app_config_key", "远程配置中心k/v store的key")
+	flag.StringVar(&C.RemoteSecret, "rsecret", "", "远程配置中心的secret keyring.gpg")
 
 	flag.Parse()
 
@@ -68,7 +70,7 @@ func main() {
 		if C.Remote == "etcd" {
 			C.RemoteUrl = "http://127.0.0.1:4001"
 		} else if C.Remote == "consul" {
-			C.RemoteUrl = "http://127.0.0.1:8500"
+			C.RemoteUrl = "127.0.0.1:8500"
 		}
 	}
 
@@ -505,7 +507,11 @@ func setDefaults() {
 
 func readFromRemote() {
 	{{if ne .Remote ""}}
+	{{if eq .RemoteSecret ""}}
 	viper.AddRemoteProvider("{{.Remote}}", "{{.RemoteUrl}}", "{{.RemoteKey}}")
+	{{else}}
+	viper.AddSecureRemoteProvider("{{.Remote}}", "{{.RemoteUrl}}", "{{.RemoteKey}}", "{{.RemoteSecret}}")
+	{{end}}
 	viper.SetConfigType("{{.RemoteType}}")
 	err := viper.ReadRemoteConfig()
 	if err != nil {
