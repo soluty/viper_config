@@ -57,7 +57,7 @@ func main() {
 	flag.StringVar(&C.Config, "c", "config", "生成的viper读取配置的文件名，无后缀")
 	flag.StringVar(&C.Struct, "s", "Config", "配置结构体的名字")
 	flag.StringVar(&C.Env, "e", "app", "环境变量前缀")
-	flag.StringVar(&C.Output, "o", "gen.go", "生成的文件路径")
+	flag.StringVar(&C.Output, "o", "config_gen.go", "生成的文件路径")
 	flag.StringVar(&C.Remote, "r", "", "远程配置中心类型, 可选值etcd，consul")
 	flag.StringVar(&C.RemoteUrl, "rurl", "", "远程配置中心url")
 	flag.StringVar(&C.RemoteType, "rtype", "json", "远程配置中心文件类型")
@@ -225,6 +225,14 @@ func processBasicArrayType(nt *ast.Ident, value *ast.Field, parent string) {
 		C.FlagValues = append(C.FlagValues, fmt.Sprintf(`pflag.IntSlice("%v", %v, "%v")`, getNameByParent(value, parent), getIntSliceView(tag.Get("default")), tag.Get("desc")))
 		C.EnvValues = append(C.EnvValues, fmt.Sprintf(`_ = viper.BindEnv("%v")`, getNameByParent(value, parent)))
 		C.DefaultValues = append(C.DefaultValues, fmt.Sprintf(`viper.SetDefault("%v", %v)`, getNameByParent(value, parent), getIntSliceView(tag.Get("default"))))
+	case "int32":
+		C.FlagValues = append(C.FlagValues, fmt.Sprintf(`pflag.Int32Slice("%v", %v, "%v")`, getNameByParent(value, parent), getInt32SliceView(tag.Get("default")), tag.Get("desc")))
+		C.EnvValues = append(C.EnvValues, fmt.Sprintf(`_ = viper.BindEnv("%v")`, getNameByParent(value, parent)))
+		C.DefaultValues = append(C.DefaultValues, fmt.Sprintf(`viper.SetDefault("%v", %v)`, getNameByParent(value, parent), getInt32SliceView(tag.Get("default"))))
+	case "int64":
+		C.FlagValues = append(C.FlagValues, fmt.Sprintf(`pflag.Int64Slice("%v", %v, "%v")`, getNameByParent(value, parent), getInt64SliceView(tag.Get("default")), tag.Get("desc")))
+		C.EnvValues = append(C.EnvValues, fmt.Sprintf(`_ = viper.BindEnv("%v")`, getNameByParent(value, parent)))
+		C.DefaultValues = append(C.DefaultValues, fmt.Sprintf(`viper.SetDefault("%v", %v)`, getNameByParent(value, parent), getInt64SliceView(tag.Get("default"))))
 	case "uint":
 		C.FlagValues = append(C.FlagValues, fmt.Sprintf(`pflag.UintSlice("%v", %v, "%v")`, getNameByParent(value, parent), getUIntSliceView(tag.Get("default")), tag.Get("desc")))
 		C.EnvValues = append(C.EnvValues, fmt.Sprintf(`_ = viper.BindEnv("%v")`, getNameByParent(value, parent)))
@@ -249,8 +257,44 @@ func processBasicType(nt *ast.Ident, value *ast.Field, parent string) {
 		C.FlagValues = append(C.FlagValues, fmt.Sprintf(`pflag.Int("%v", %v, "%v")`, getNameByParent(value, parent), getIntView(tag.Get("default")), tag.Get("desc")))
 		C.EnvValues = append(C.EnvValues, fmt.Sprintf(`_ = viper.BindEnv("%v")`, getNameByParent(value, parent)))
 		C.DefaultValues = append(C.DefaultValues, fmt.Sprintf(`viper.SetDefault("%v", %v)`, getNameByParent(value, parent), getIntView(tag.Get("default"))))
+	case "int8":
+		C.FlagValues = append(C.FlagValues, fmt.Sprintf(`pflag.Int8("%v", %v, "%v")`, getNameByParent(value, parent), getIntView(tag.Get("default")), tag.Get("desc")))
+		C.EnvValues = append(C.EnvValues, fmt.Sprintf(`_ = viper.BindEnv("%v")`, getNameByParent(value, parent)))
+		C.DefaultValues = append(C.DefaultValues, fmt.Sprintf(`viper.SetDefault("%v", %v)`, getNameByParent(value, parent), getIntView(tag.Get("default"))))
+	case "int16":
+		C.FlagValues = append(C.FlagValues, fmt.Sprintf(`pflag.Int16("%v", %v, "%v")`, getNameByParent(value, parent), getIntView(tag.Get("default")), tag.Get("desc")))
+		C.EnvValues = append(C.EnvValues, fmt.Sprintf(`_ = viper.BindEnv("%v")`, getNameByParent(value, parent)))
+		C.DefaultValues = append(C.DefaultValues, fmt.Sprintf(`viper.SetDefault("%v", %v)`, getNameByParent(value, parent), getIntView(tag.Get("default"))))
+	case "int32":
+		C.FlagValues = append(C.FlagValues, fmt.Sprintf(`pflag.Int32("%v", %v, "%v")`, getNameByParent(value, parent), getIntView(tag.Get("default")), tag.Get("desc")))
+		C.EnvValues = append(C.EnvValues, fmt.Sprintf(`_ = viper.BindEnv("%v")`, getNameByParent(value, parent)))
+		C.DefaultValues = append(C.DefaultValues, fmt.Sprintf(`viper.SetDefault("%v", %v)`, getNameByParent(value, parent), getIntView(tag.Get("default"))))
+	case "int64":
+		C.FlagValues = append(C.FlagValues, fmt.Sprintf(`pflag.Int64("%v", %v, "%v")`, getNameByParent(value, parent), getIntView(tag.Get("default")), tag.Get("desc")))
+		C.EnvValues = append(C.EnvValues, fmt.Sprintf(`_ = viper.BindEnv("%v")`, getNameByParent(value, parent)))
+		C.DefaultValues = append(C.DefaultValues, fmt.Sprintf(`viper.SetDefault("%v", %v)`, getNameByParent(value, parent), getIntView(tag.Get("default"))))
 	case "uint":
-		C.FlagValues = append(C.FlagValues, fmt.Sprintf(`pflag.UInt("%v", %v, "%v")`, getNameByParent(value, parent), getIntView(tag.Get("default")), tag.Get("desc")))
+		C.FlagValues = append(C.FlagValues, fmt.Sprintf(`pflag.Uint("%v", %v, "%v")`, getNameByParent(value, parent), getIntView(tag.Get("default")), tag.Get("desc")))
+		C.EnvValues = append(C.EnvValues, fmt.Sprintf(`_ = viper.BindEnv("%v")`, getNameByParent(value, parent)))
+		C.DefaultValues = append(C.DefaultValues, fmt.Sprintf(`viper.SetDefault("%v", %v)`, getNameByParent(value, parent), getIntView(tag.Get("default"))))
+	case "byte":
+		C.FlagValues = append(C.FlagValues, fmt.Sprintf(`pflag.Uint8("%v", %v, "%v")`, getNameByParent(value, parent), getIntView(tag.Get("default")), tag.Get("desc")))
+		C.EnvValues = append(C.EnvValues, fmt.Sprintf(`_ = viper.BindEnv("%v")`, getNameByParent(value, parent)))
+		C.DefaultValues = append(C.DefaultValues, fmt.Sprintf(`viper.SetDefault("%v", %v)`, getNameByParent(value, parent), getIntView(tag.Get("default"))))
+	case "uint8":
+		C.FlagValues = append(C.FlagValues, fmt.Sprintf(`pflag.Uint8("%v", %v, "%v")`, getNameByParent(value, parent), getIntView(tag.Get("default")), tag.Get("desc")))
+		C.EnvValues = append(C.EnvValues, fmt.Sprintf(`_ = viper.BindEnv("%v")`, getNameByParent(value, parent)))
+		C.DefaultValues = append(C.DefaultValues, fmt.Sprintf(`viper.SetDefault("%v", %v)`, getNameByParent(value, parent), getIntView(tag.Get("default"))))
+	case "uint16":
+		C.FlagValues = append(C.FlagValues, fmt.Sprintf(`pflag.Uint16("%v", %v, "%v")`, getNameByParent(value, parent), getIntView(tag.Get("default")), tag.Get("desc")))
+		C.EnvValues = append(C.EnvValues, fmt.Sprintf(`_ = viper.BindEnv("%v")`, getNameByParent(value, parent)))
+		C.DefaultValues = append(C.DefaultValues, fmt.Sprintf(`viper.SetDefault("%v", %v)`, getNameByParent(value, parent), getIntView(tag.Get("default"))))
+	case "uint32":
+		C.FlagValues = append(C.FlagValues, fmt.Sprintf(`pflag.Uint32("%v", %v, "%v")`, getNameByParent(value, parent), getIntView(tag.Get("default")), tag.Get("desc")))
+		C.EnvValues = append(C.EnvValues, fmt.Sprintf(`_ = viper.BindEnv("%v")`, getNameByParent(value, parent)))
+		C.DefaultValues = append(C.DefaultValues, fmt.Sprintf(`viper.SetDefault("%v", %v)`, getNameByParent(value, parent), getIntView(tag.Get("default"))))
+	case "uint64":
+		C.FlagValues = append(C.FlagValues, fmt.Sprintf(`pflag.Uint64("%v", %v, "%v")`, getNameByParent(value, parent), getIntView(tag.Get("default")), tag.Get("desc")))
 		C.EnvValues = append(C.EnvValues, fmt.Sprintf(`_ = viper.BindEnv("%v")`, getNameByParent(value, parent)))
 		C.DefaultValues = append(C.DefaultValues, fmt.Sprintf(`viper.SetDefault("%v", %v)`, getNameByParent(value, parent), getIntView(tag.Get("default"))))
 	case "string":
@@ -322,6 +366,46 @@ func getIntSliceView(str string) string {
 	}
 	arr := strings.Split(str, ",")
 	ret := "[]int{"
+	for idx, value := range arr {
+		d, err := strconv.Atoi(value)
+		if err != nil {
+			panic(err)
+		}
+		if idx < len(arr)-1 {
+			ret += fmt.Sprintf("%v", d) + `, `
+		} else {
+			ret += fmt.Sprintf("%v", d)
+		}
+	}
+	ret += "}"
+	return ret
+}
+func getInt32SliceView(str string) string {
+	if str == "" {
+		return "nil"
+	}
+	arr := strings.Split(str, ",")
+	ret := "[]int32{"
+	for idx, value := range arr {
+		d, err := strconv.Atoi(value)
+		if err != nil {
+			panic(err)
+		}
+		if idx < len(arr)-1 {
+			ret += fmt.Sprintf("%v", d) + `, `
+		} else {
+			ret += fmt.Sprintf("%v", d)
+		}
+	}
+	ret += "}"
+	return ret
+}
+func getInt64SliceView(str string) string {
+	if str == "" {
+		return "nil"
+	}
+	arr := strings.Split(str, ",")
+	ret := "[]int64{"
 	for idx, value := range arr {
 		d, err := strconv.Atoi(value)
 		if err != nil {
@@ -458,6 +542,7 @@ package {{ .Package }}
 import (
 	"flag"
 	"fmt"
+	"os"
 {{if .HasNet}}	"net"{{end}}
 {{if .HasTime}}	"time"{{end}}
 {{if ne .Remote ""}}	_ "github.com/spf13/viper/remote"{{end}}
