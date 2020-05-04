@@ -542,7 +542,6 @@ package {{ .Package }}
 import (
 	"flag"
 	"fmt"
-	"os"
 {{if .HasNet}}	"net"{{end}}
 {{if .HasTime}}	"time"{{end}}
 {{if ne .Remote ""}}	_ "github.com/spf13/viper/remote"{{end}}
@@ -551,17 +550,21 @@ import (
 	"github.com/spf13/viper"
 )
 
-var C = {{ .Struct }}{}
+var c = {{ .Struct }}{}
 var watchFunc func()
 
-func Init(watch func(), filePath ...string) {
+func Get() {{ .Struct }} {
+	return c
+}
+
+func Init(watch func(), confName string, filePath ...string) {
 	watchFunc = watch
 	setFlags()
 	setEnv()
-	readConfigFile(filePath)
+	readConfigFile(filePath, confName)
 	setDefaults()
 	readFromRemote()
-	err := viper.Unmarshal(&C)
+	err := viper.Unmarshal(&c)
 	if err != nil {
 		panic(err)
 	}
@@ -623,13 +626,11 @@ func readFromRemote() {
 	{{ end }}
 }
 
-func readConfigFile(path []string) {
-	env := os.Getenv("GO_ENV")
-	if env != "" {
-		viper.SetConfigName(env)
-	} else {
-		viper.SetConfigName("{{ .Config }}")
+func readConfigFile(path []string, confName string) {
+	if confName == "" {
+		return
 	}
+	viper.SetConfigName(confName)
 	if len(path) == 0 {
 		viper.AddConfigPath(".")
 	}else {
@@ -644,7 +645,7 @@ func readConfigFile(path []string) {
 	if watchFunc != nil {
 		viper.WatchConfig()
 		viper.OnConfigChange(func(e fsnotify.Event) {
-			err := viper.Unmarshal(&C)
+			err := viper.Unmarshal(&c)
 			if err != nil {
 				fmt.Println(err)
 				return
