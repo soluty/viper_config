@@ -1,4 +1,4 @@
-module main
+module github.com/soluty/viper_config
 
 go 1.12
 
